@@ -1,28 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Co-Scientist</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background: #f0f0f0; }
-        .container { background: #fff; padding: 20px; border-radius: 5px; max-width: 800px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        textarea { width: 100%; height: 100px; margin-bottom: 10px; padding: 10px; }
-        input[type=submit] { padding: 10px 20px; background: #007BFF; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-        input[type=submit]:hover { background: #0056b3; }
-        .output { background: #e9e9e9; padding: 10px; border-radius: 4px; white-space: pre-wrap; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Hustad's AI Scientific Hypothesis Generator</title>
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 20px; background-color: #f5f5f5; }
+    .container { max-width: 1200px; margin: auto; padding: 20px; }
+    .mdl-textfield { width: 100%; }
+    .result-card { width: 100%; margin-bottom: 20px; }
+    .mdl-card { min-height: auto; margin-bottom: 16px; }
+    .mdl-card__title { background-color: #3f51b5; color: white; }
+    .mdl-card__supporting-text { padding: 16px; white-space: pre-wrap; }
+    .mdl-card__menu { color: white; }
+    .iteration-number { position: absolute; right: 16px; color: rgba(0,0,0,0.54); }
+    .section-title { color: rgba(0,0,0,0.54); margin: 8px 0; font-size: 14px; font-weight: 500; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AI Co-Scientist Simulation</h1>
-        <form method="post">
-            <label for="goal">Enter your research goal:</label><br>
-            <textarea id="goal" name="goal" placeholder="e.g., Discover innovative materials for solar panels..." required>{{ goal }}</textarea><br>
-            <input type="submit" value="Submit">
+  <div class="container">
+    <div class="mdl-card mdl-shadow--2dp" style="width: 100%; margin-bottom: 32px;">
+      <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">AI Scientific Hypothesis Generator</h2>
+      </div>
+      <div class="mdl-card__supporting-text">
+        <form method="post" action="/">
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <textarea class="mdl-textfield__input" type="text" rows="3" id="goal" name="goal" required>{{ goal }}</textarea>
+            <label class="mdl-textfield__label" for="goal">Enter your research goal...</label>
+          </div>
+          <div style="text-align: right; margin-top: 16px;">
+            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+              <i class="material-icons" style="vertical-align: middle; margin-right: 8px;">science</i>
+              Generate Hypotheses
+            </button>
+          </div>
         </form>
-        {% if output %}
-        <h2>Resulting Hypothesis:</h2>
-        <div class="output">{{ output }}</div>
-        {% endif %}
+      </div>
     </div>
+
+    {% if results %}
+      {% for analysis in results %}
+        <div class="mdl-card mdl-shadow--2dp result-card">
+          <div class="mdl-card__title">
+            <h2 class="mdl-card__title-text">Iteration {{ analysis.iteration }}</h2>
+          </div>
+          
+          <div class="mdl-card__supporting-text">
+            <div class="section-title">HYPOTHESIS</div>
+            <div style="margin-bottom: 16px;">{{ analysis.hypothesis }}</div>
+
+            <div class="section-title">REFLECTION</div>
+            <div style="margin-bottom: 16px;">{{ analysis.reflection }}</div>
+
+            <div class="section-title">RANKING & EVALUATION</div>
+            <div style="margin-bottom: 16px;">{{ analysis.ranking }}</div>
+
+            <div class="section-title">PROXIMITY ANALYSIS</div>
+            <div style="margin-bottom: 16px;">{{ analysis.proximity_analysis }}</div>
+
+            <div class="section-title">META REVIEW</div>
+            <div>{{ analysis.meta_review }}</div>
+          </div>
+
+          <div class="mdl-card__menu">
+            <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect">
+              <i class="material-icons">more_vert</i>
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
 </body>
 </html>
