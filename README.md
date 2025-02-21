@@ -85,4 +85,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 - Add visualization of research insights
 
 
-**Powered by The Victor Collective **
+**Powered by The Victor Collective**
