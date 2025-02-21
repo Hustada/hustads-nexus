@@ -7,6 +7,8 @@ import requests
 import functools
 from functools import wraps
 import datetime
+from typing import Dict, List, Any
+from web_research_agent import research_hypothesis
 
 def retry_with_backoff(max_retries=3, initial_delay=1):
     """
@@ -118,12 +120,13 @@ def get_gemini_response(prompt, timeout=10):
         print(f"Error in Gemini API call after all retries: {e}")
         return f"[API Error: {str(e)}]"
 
-def generate_hypothesis(goal):
+def generate_hypothesis(goal: str, include_web_research: bool = True) -> str:
     """
     Generate an initial hypothesis based on the research goal using Gemini.
     
     Args:
         goal (str): The scientific research goal or question
+        include_web_research (bool): Whether to include web research in the hypothesis
     
     Returns:
         str: A generated scientific hypothesis
@@ -154,11 +157,29 @@ def generate_hypothesis(goal):
         hypothesis = get_gemini_response(prompt)
         
         # Additional processing or validation can be added here
+        if include_web_research:
+            web_research = web_research_agent(hypothesis)
+            # Optionally incorporate web research into hypothesis
+            # This is a placeholder for more sophisticated integration
+            hypothesis += f"\n\nWeb Research Insights:\n{json.dumps(web_research, indent=2)}"
+        
         return hypothesis
     
     except Exception as e:
         print(f"Error generating hypothesis: {e}")
         return f"Unable to generate hypothesis. Error: {e}"
+
+def web_research_agent(hypothesis: str) -> Dict[str, Any]:
+    """
+    Web research agent to supplement hypothesis generation
+    
+    Args:
+        hypothesis (str): Scientific hypothesis to research
+    
+    Returns:
+        Comprehensive web research findings
+    """
+    return research_hypothesis(hypothesis)
 
 def reflect_hypothesis(hypothesis):
     """
