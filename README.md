@@ -84,7 +84,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 - Implement more advanced hypothesis generation techniques
 - Add visualization of research insights
 
-## 📞 Contact
-Mark Hustad - [Your Email/LinkedIn]
 
-**Powered by cutting-edge AI research and innovation**
+**Powered by The Victor Collective **
