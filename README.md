@@ -15,20 +15,36 @@ An advanced AI-powered research assistant that dynamically generates, reflects u
 ## 🔬 How It Works
 The AI Scientific Hypothesis Generator uses a sophisticated multi-agent system to explore research questions:
 
-1. **Hypothesis Generation**: Create initial scientific hypotheses
-2. **Hypothesis Reflection**: Critically analyze generated hypotheses
-3. **Hypothesis Ranking**: Evaluate hypotheses based on scientific merit
-4. **Iterative Refinement**: Progressively improve research insights
+1. **Hypothesis Generation**: Create initial scientific hypotheses using Gemini AI
+2. **Web Research Integration**: Dynamically enrich hypotheses with real-time web and academic research
+   - Leverages SerpAPI for comprehensive web searches
+   - Retrieves recent scientific publications from arXiv
+   - Provides contextual insights and current research trends
+3. **Hypothesis Reflection**: Critically analyze generated hypotheses
+4. **Hypothesis Ranking**: Evaluate hypotheses based on scientific merit
+5. **Iterative Refinement**: Progressively improve research insights
 
 ### Research Iteration Workflow
 - Users can select 1-5 research iterations
 - Each iteration explores the research goal from different perspectives
 - Generates comprehensive, nuanced research insights
 
+### Research Capabilities
+- Real-time web and academic research integration
+- Multi-source intelligence gathering
+- Adaptive research exploration
+- Cross-domain knowledge synthesis
+
 ## 💻 Technology Stack
 - **Frontend**: HTML, Tailwind CSS, Vanilla JavaScript
 - **Backend**: Python, Flask
-- **AI Components**: Multi-agent language model interactions
+- **AI Components**: 
+  * Multi-agent language model interactions
+  * Gemini AI for hypothesis generation
+  * Web research agent with SerpAPI integration
+- **Research Tools**:
+  * arXiv API integration
+  * Dynamic web search capabilities
 - **Event Streaming**: Server-Sent Events (SSE)
 
 ## 🛠 Setup and Installation
