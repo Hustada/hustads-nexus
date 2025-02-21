@@ -1,77 +1,169 @@
-from agents import generate_hypothesis, reflect_hypothesis, evolve_hypothesis, ranking_hypothesis, proximity_analysis, meta_review
-from dataclasses import dataclass
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import List, Dict, Any
+import json
+from datetime import datetime
+
+from agents import (
+    generate_hypothesis, 
+    reflect_hypothesis, 
+    ranking_hypothesis, 
+    proximity_analysis, 
+    meta_review,
+    format_and_enhance_output,
+    prepare_frontend_research_data,  
+    AGENT_STATES
+)
 
 @dataclass
-class HypothesisAnalysis:
-    hypothesis: str
-    reflection: Optional[str] = None
-    ranking: Optional[str] = None
-    proximity_analysis: Optional[str] = None
-    meta_review: Optional[str] = None
-    iteration: int = 0
+class ResearchCycle:
+    goal: str
+    iterations: int = 3
+    current_iteration: int = 1
+    research_results: List[Dict[str, Any]] = field(default_factory=list)
+    active_agent: str = None
+    progress_log: List[Dict[str, Any]] = field(default_factory=list)
+    progress_callback: Any = None
 
-class Supervisor:
-    def __init__(self):
-        self.generator = generate_hypothesis
-        self.reflector = reflect_hypothesis
-        self.evolver = evolve_hypothesis
-        self.ranker = ranking_hypothesis
-        self.proximity_analyzer = proximity_analysis
-        self.meta_reviewer = meta_review
-    
-    def analyze_hypothesis(self, hypothesis: str, iteration: int = 0) -> HypothesisAnalysis:
-        """Run a complete analysis of a hypothesis using all agents."""
-        reflection = self.reflector(hypothesis)
-        ranking = self.ranker(hypothesis)
-        proximity = self.proximity_analyzer(hypothesis)
-        meta = self.meta_reviewer(hypothesis)
+    def track_agent_progress(self, agent_name: str, details: Dict[str, Any] = None):
+        """
+        Log agent progress with symbolic tracking
+        """
+        progress_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "agent": agent_name,
+            "details": details or AGENT_STATES.get(agent_name, {}),
+            "iteration": self.current_iteration
+        }
+        self.progress_log.append(progress_entry)
         
-        return HypothesisAnalysis(
-            hypothesis=hypothesis,
-            reflection=reflection,
-            ranking=ranking,
-            proximity_analysis=proximity,
-            meta_review=meta,
-            iteration=iteration
-        )
-    
-    def run_research_cycle(self, research_goal: str, iterations: int = 1) -> List[HypothesisAnalysis]:
-        """Run a complete research cycle and return analysis from all agents."""
-        # Generate initial hypothesis
-        current_hypothesis = self.generator(research_goal)
-        results = []
-        
-        # Initial analysis
-        analysis = self.analyze_hypothesis(current_hypothesis, 0)
-        results.append(analysis)
-        
-        # Iterative refinement
-        for i in range(iterations):
-            # Combine all feedback for evolution
-            feedback = f"Reflection: {analysis.reflection}\nRanking: {analysis.ranking}\nProximity: {analysis.proximity_analysis}\nMeta Review: {analysis.meta_review}"
-            
-            # Evolve hypothesis with feedback
-            current_hypothesis = self.evolver(current_hypothesis + "\n\nFeedback:\n" + feedback)
-            
-            # Analyze new hypothesis
-            analysis = self.analyze_hypothesis(current_hypothesis, i + 1)
-            results.append(analysis)
-        
-        return results
+        # Optional: Emit progress via WebSocket or logging
+        self._emit_progress(progress_entry)
 
-def run_research_cycle(goal: str) -> List[HypothesisAnalysis]:
-    """Main entry point for running a research cycle."""
-    supervisor = Supervisor()
-    return supervisor.run_research_cycle(goal)
+    def _emit_progress(self, progress_entry):
+        """
+        Emit progress to frontend via callback
+        """
+        if self.progress_callback:
+            # Simplified progress message for frontend
+            simple_progress = {
+                "status": f"{progress_entry['details'].get('description', 'Processing')} - Iteration {progress_entry['iteration']}",
+                "agent": progress_entry['agent'],
+                "iteration": progress_entry['iteration']
+            }
+            self.progress_callback(simple_progress)
+        print(f"Progress: {json.dumps(progress_entry, indent=2)}")
+
+    def run_research_cycle(self) -> Dict[str, Any]:
+        """
+        Execute full research cycle with enhanced tracking and formatting
+        """
+        # Reset research results and progress log
+        self.research_results = []
+        self.progress_log = []
+        self.current_iteration = 1
+
+        try:
+            while self.current_iteration <= self.iterations:
+                print(f"🔬 Starting Iteration {self.current_iteration}")
+                
+                # Hypothesis Generation
+                self.active_agent = "generator"
+                self.track_agent_progress(self.active_agent)
+                hypothesis = generate_hypothesis(self.goal)
+
+                # Reflection
+                self.active_agent = "reflector"
+                self.track_agent_progress(self.active_agent)
+                reflection = reflect_hypothesis(hypothesis)
+
+                # Ranking
+                self.active_agent = "ranker"
+                self.track_agent_progress(self.active_agent)
+                ranking = ranking_hypothesis(hypothesis, reflection)
+
+                # Proximity Analysis
+                self.active_agent = "proximity_analyzer"
+                self.track_agent_progress(self.active_agent)
+                proximity_result = proximity_analysis(hypothesis)
+
+                # Meta Review
+                self.active_agent = "meta_reviewer"
+                self.track_agent_progress(self.active_agent)
+                meta_review_result = meta_review(hypothesis)
+
+                # Novel Synthesis with new flexible format
+                novel_synthesis = format_and_enhance_output(
+                    [
+                        {
+                            "hypothesis": hypothesis,
+                            "reflection": reflection,
+                            "ranking": ranking,
+                            "proximity_analysis": proximity_result,
+                            "meta_review": meta_review_result
+                        }
+                    ],
+                    original_goal=self.goal
+                )
+
+                # Compile Research Result
+                research_result = {
+                    "iterations": [{
+                        "iteration": self.current_iteration,
+                        "hypothesis": hypothesis,
+                        "reflection": reflection,
+                        "ranking": ranking,
+                        "goal": self.goal
+                    }],
+                    "novel_synthesis": novel_synthesis
+                }
+
+                self.research_results.append(research_result)
+                self.current_iteration += 1
+
+                # Optional: Break if we've reached desired state
+                if self._should_terminate_research():
+                    break
+
+        except Exception as e:
+            print(f"Research cycle error: {e}")
+            return {"error": str(e)}
+
+        return self.research_results[0] if self.research_results else {}
+
+    def _should_terminate_research(self):
+        """
+        Determine if research cycle should terminate early
+        
+        Can be customized with more complex logic in future
+        """
+        return self.current_iteration > self.iterations
+
+def initiate_research(research_goal: str, iterations: int = 1, progress_callback=None) -> Dict[str, Any]:
+    """
+    Initiate a new research cycle
+    
+    Args:
+        research_goal (str): The scientific question or objective
+        iterations (int, optional): Number of research iterations. Defaults to 1.
+        progress_callback (callable, optional): Function to track progress. Defaults to None.
+    
+    Returns:
+        Dict containing research results and metadata
+    """
+    print(f"🚀 Initiating Research Cycle: {research_goal}")
+    print(f"   Iterations: {iterations}")
+    
+    # Create ResearchCycle instance with optional progress callback
+    research_cycle = ResearchCycle(
+        goal=research_goal, 
+        iterations=iterations,
+        progress_callback=progress_callback
+    )
+    
+    # Execute research cycle and return results
+    return research_cycle.run_research_cycle()
 
 if __name__ == "__main__":
     research_goal = "Understand the mechanism of antimicrobial resistance in bacteria"
-    results = run_research_cycle(research_goal)
-    for analysis in results:
-        print(f"\nIteration {analysis.iteration}:\n" + "=" * 50)
-        print(f"Hypothesis: {analysis.hypothesis}\n")
-        print(f"Reflection: {analysis.reflection}\n")
-        print(f"Ranking: {analysis.ranking}\n")
-        print(f"Proximity Analysis: {analysis.proximity_analysis}\n")
-        print(f"Meta Review: {analysis.meta_review}\n")
+    results = initiate_research(research_goal)
+    print(json.dumps(results, indent=2))
