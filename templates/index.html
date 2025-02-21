@@ -1,140 +1,270 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Scientific Hypothesis Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #3a6ea5;
-            --secondary-color: #6c757d;
-            --background-color: #f4f6f9;
-            --card-background: #ffffff;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Scientific Hypothesis Generator</title>
+  <!-- Load fonts: Roboto for body and Roboto Slab for headings -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            accent: { DEFAULT: "#00bcd4" },
+            neutral: { DEFAULT: "#ffffff", dark: "#000000", gray: "#bfbfbf" }
+          },
+          fontFamily: {
+            sans: ["Roboto", "sans-serif"],
+            serif: ["Roboto Slab", "serif"]
+          }
         }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background-color);
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 1200px;
-            padding: 2rem 1rem;
-        }
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-        }
-        .card-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-bottom: none;
-            font-weight: 600;
-        }
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #2c5a8a;
-            border-color: #2c5a8a;
-        }
-        .form-control {
-            border-radius: 8px;
-        }
-        .section-title {
-            color: var(--secondary-color);
-            font-weight: 600;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .loading {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-    </style>
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #000;
+      color: #e5e5e5;
+    }
+    /* Main container to center content */
+    .main-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    /* Card style for a professional, journal look */
+    .card {
+      background-color: #1c1c1c;
+      border: 1px solid #333;
+      padding: 2rem;
+      border-radius: 0.25rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+      width: 100%;
+    }
+    header h1 {
+      font-family: 'Roboto Slab', serif;
+      border-bottom: 2px solid #00bcd4;
+      display: inline-block;
+      padding-bottom: 0.25rem;
+    }
+    /* Section headers for output */
+    .section-header {
+      font-family: 'Roboto Slab', serif;
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+      color: #00bcd4;
+    }
+    .section-content {
+      font-size: 1.125rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .formatted-text {
+      white-space: pre-wrap;
+      font-size: 1.125rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    /* Divider between sections */
+    .divider {
+      border-top: 1px solid #444;
+      margin: 1.5rem 0;
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h2 class="mb-0">AI Scientific Hypothesis Generator</h2>
-                    </div>
-                    <div class="card-body">
-                        <form id="hypothesis-form" method="post">
-                            <div class="mb-3">
-                                <label for="research-goal" class="form-label">Enter Research Goal</label>
-                                <textarea 
-                                    class="form-control" 
-                                    id="research-goal" 
-                                    name="goal" 
-                                    rows="4" 
-                                    placeholder="e.g., Explore the relationship between gut microbiota and brain function"
-                                    required
-                                >{{ goal }}</textarea>
-                            </div>
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-primary">
-                                    Generate Hypothesis
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                {% if results %}
-                    <div id="results" class="fade-in">
-                        {% for analysis in results %}
-                            <div class="card">
-                                <div class="card-header">
-                                    Iteration {{ analysis.iteration }}
-                                </div>
-                                <div class="card-body">
-                                    <div class="section-title">Hypothesis</div>
-                                    <p>{{ analysis.hypothesis }}</p>
-
-                                    <div class="section-title">Reflection</div>
-                                    <p>{{ analysis.reflection }}</p>
-
-                                    <div class="section-title">Ranking & Evaluation</div>
-                                    <p>{{ analysis.ranking }}</p>
-
-                                    <div class="section-title">Proximity Analysis</div>
-                                    <p>{{ analysis.proximity_analysis }}</p>
-
-                                    <div class="section-title">Meta Review</div>
-                                    <p>{{ analysis.meta_review }}</p>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+<body class="h-full">
+  <!-- Main Container -->
+  <div class="min-h-screen flex flex-col items-center justify-start px-4 py-12 main-container space-y-12">
+    <!-- Header -->
+    <header class="w-full text-center mb-8 border-b border-gray-700 pb-4">
+      <h1 class="text-5xl font-bold mb-2">AI Scientific Hypothesis Generator</h1>
+      <p class="text-xl text-gray-400">Advancing Research with AI</p>
+    </header>
+    
+    <!-- Research Form Section -->
+    <section id="form-section" class="card mx-auto">
+      <h2 class="text-3xl font-bold mb-6 text-center">Enter Your Research Query</h2>
+      <form id="research-form" class="space-y-6">
+        <div>
+          <label for="research-goal" class="block text-lg font-medium mb-2">Research Goal</label>
+          <textarea id="research-goal" name="research_goal" rows="6" class="w-full p-4 bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-accent focus:outline-none" placeholder="State your scientific research objective..."></textarea>
         </div>
-    </div>
+        <div>
+          <label for="suggested-questions" class="block text-lg font-medium mb-2">Or Choose a Suggested Question</label>
+          <select id="suggested-questions" class="w-full p-4 bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-accent focus:outline-none">
+            <option value="">Select a Research Question</option>
+            <optgroup label="Biology & Medicine">
+              <option value="How do epigenetic modifications influence neurodegenerative diseases?">Epigenetics in Neurodegeneration</option>
+              <option value="What mechanisms enable complex tissue regeneration?">Tissue Regeneration Mechanisms</option>
+            </optgroup>
+            <optgroup label="Physics & Cosmology">
+              <option value="What quantum mechanisms might explain dark matter interactions?">Quantum Dark Matter Interactions</option>
+              <option value="How do gravitational waves capture cosmic event data?">Gravitational Wave Insights</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="flex items-center space-x-4">
+          <label class="text-lg font-medium">Iterations:</label>
+          <input type="number" id="iterations" name="iterations" min="1" max="5" value="3" class="w-24 p-2 bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-accent focus:outline-none">
+        </div>
+        <button type="submit" class="w-full py-4 bg-accent hover:bg-accent/80 transition-colors font-bold text-xl">
+          Start Research
+        </button>
+      </form>
+    </section>
+    
+    <!-- Progress Section -->
+    <section id="progress-section" class="card mx-auto hidden">
+      <h2 class="text-2xl font-bold mb-4 text-center">Research Progress</h2>
+      <div class="w-full bg-gray-800 rounded h-4 mb-4">
+        <div id="overall-progress" class="bg-accent h-4 rounded" style="width: 0%"></div>
+      </div>
+      <p id="current-status" class="text-center text-lg text-gray-400">Waiting for research to start...</p>
+    </section>
+    
+    <!-- Results Section -->
+    <section id="results-section" class="card mx-auto hidden">
+      <h2 class="text-3xl font-bold mb-6 text-center">Research Insights</h2>
+      <div id="results-content" class="space-y-8"></div>
+      <div class="text-center mt-8">
+        <button id="new-research-btn" class="py-3 px-6 bg-accent hover:bg-accent/80 transition-colors font-bold text-xl">
+          New Research
+        </button>
+      </div>
+    </section>
+  </div>
+  
+  <!-- Scripts -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Handle Suggested Questions
+      const suggestedQuestions = document.getElementById('suggested-questions');
+      suggestedQuestions.addEventListener('change', function() {
+        if (this.value) {
+          document.getElementById('research-goal').value = this.value;
+        }
+      });
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('hypothesis-form').addEventListener('submit', function() {
-            this.classList.add('loading');
+      // Research Form Submission
+      const researchForm = document.getElementById('research-form');
+      researchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const researchGoal = document.getElementById('research-goal').value;
+        const iterations = document.getElementById('iterations').value || 3;
+        fetch('/research', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ research_goal: researchGoal, iterations: iterations })
+        })
+        .then(response => {
+          if (!response.ok) { throw new Error('Research submission failed'); }
+          return response.json();
+        })
+        .then(data => {
+          if (data.status === 'started' && data.session_id) {
+            const sessionId = data.session_id;
+            const eventSource = new EventSource(`/events/${sessionId}`);
+            // Hide the form; show progress section
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('progress-section').classList.remove('hidden');
+            resetProgressBars();
+            eventSource.onmessage = function(event) {
+              try {
+                const message = JSON.parse(event.data);
+                if (message.type === 'progress') {
+                  updateProgress(message.data);
+                } else if (message.type === 'results') {
+                  displayResults(message.data);
+                  eventSource.close();
+                } else if (message.type === 'error') {
+                  console.error('Research error:', message.data);
+                  alert(`Research error: ${message.data}`);
+                  eventSource.close();
+                }
+              } catch (error) {
+                console.error('Error processing message:', error);
+              }
+            };
+            eventSource.onerror = function(error) {
+              console.error('EventSource failed:', error);
+              alert('Connection lost. Please try again.');
+              eventSource.close();
+            };
+          } else {
+            throw new Error('Invalid server response');
+          }
+        })
+        .catch(error => {
+          console.error('Error in research submission:', error);
+          alert(`Error: ${error.message}. Please try again.`);
         });
-    </script>
+      });
+
+      // New Research Button: Reset UI for a new cycle.
+      const newResearchBtn = document.getElementById('new-research-btn');
+      newResearchBtn.addEventListener('click', function() {
+        document.getElementById('results-section').classList.add('hidden');
+        document.getElementById('form-section').classList.remove('hidden');
+      });
+
+      function updateProgress(message) {
+        const overallProgressBar = document.getElementById('overall-progress');
+        const currentStatus = document.getElementById('current-status');
+        let statusMessage = message.status || 'Processing...';
+        currentStatus.textContent = statusMessage;
+        let currentWidth = parseInt(overallProgressBar.style.width) || 0;
+        overallProgressBar.style.width = `${Math.min(currentWidth + 25, 100)}%`;
+      }
+
+      function displayResults(results) {
+        const resultsContent = document.getElementById('results-content');
+        const progressSection = document.getElementById('progress-section');
+        const resultsSection = document.getElementById('results-section');
+        resultsContent.innerHTML = '';
+        progressSection.classList.add('hidden');
+        resultsSection.classList.remove('hidden');
+        
+        if (results.iterations) {
+          results.iterations.forEach((iteration) => {
+            // Remove asterisks from the text.
+            const cleanHypothesis = iteration.hypothesis.replace(/\*/g, '');
+            const cleanReflection = iteration.reflection.replace(/\*/g, '');
+            const cleanRanking = iteration.ranking.replace(/\*/g, '');
+            
+            const card = document.createElement('div');
+            card.className = 'bg-gray-800 p-6 rounded shadow-md';
+            card.innerHTML = `
+              <h3 class="text-2xl font-bold mb-4 text-accent text-center">Research Iteration ${iteration.iteration}</h3>
+              <div class="mb-4">
+                <h4 class="section-header">Hypothesis</h4>
+                <div class="formatted-text">${cleanHypothesis}</div>
+                <div class="divider"></div>
+              </div>
+              <div class="mb-4">
+                <h4 class="section-header">Reflection</h4>
+                <div class="formatted-text">${cleanReflection}</div>
+                <div class="divider"></div>
+              </div>
+              <div class="mb-4">
+                <h4 class="section-header">Ranking</h4>
+                <div class="formatted-text">${cleanRanking}</div>
+              </div>
+            `;
+            resultsContent.appendChild(card);
+          });
+        }
+      }
+
+      function resetProgressBars() {
+        const overallProgressBar = document.getElementById('overall-progress');
+        overallProgressBar.style.width = '0%';
+        document.getElementById('current-status').textContent = 'Starting research...';
+      }
+    });
+  </script>
 </body>
 </html>
